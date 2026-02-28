@@ -5,6 +5,7 @@ import { PostHogProvider } from '@/providers/posthog-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 import { Navbar } from '@/components/navbar';
 
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {

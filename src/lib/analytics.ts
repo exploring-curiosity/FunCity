@@ -37,6 +37,7 @@ function getDemographics(): Partial<UserDemographics> {
       const parsed = JSON.parse(data);
       return {
         user_id: parsed.id,
+        username: parsed.username,
         age_group: parsed.age_group,
         country: parsed.country,
         nyc_familiarity: parsed.nyc_familiarity,
@@ -62,11 +63,12 @@ export function track(event: string, properties?: Record<string, unknown>) {
   }
 }
 
-export function identifyUser(userId: string, demographics: Omit<UserDemographics, 'user_id'>) {
+export function identifyUser(userId: string, username: string, demographics: Omit<UserDemographics, 'user_id' | 'username'>) {
   if (typeof window === 'undefined') return;
 
   if (initialized) {
     posthog.identify(userId, {
+      username,
       age_group: demographics.age_group,
       country: demographics.country,
       nyc_familiarity: demographics.nyc_familiarity,

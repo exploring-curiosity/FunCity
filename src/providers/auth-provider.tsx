@@ -38,6 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(stored) as User;
         setUser(parsed);
         setToken(storedToken);
+        identifyUser(parsed.id, parsed.username, {
+          age_group: parsed.age_group,
+          country: parsed.country,
+          nyc_familiarity: parsed.nyc_familiarity,
+        });
       }
     } catch {
       // ignore
@@ -60,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(data.token);
     localStorage.setItem('funCity_user', JSON.stringify(data.user));
     localStorage.setItem('funCity_token', data.token);
-    identifyUser(data.user.id, {
+    identifyUser(data.user.id, data.user.username, {
       age_group: data.user.age_group,
       country: data.user.country,
       nyc_familiarity: data.user.nyc_familiarity,
@@ -83,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(data.token);
     localStorage.setItem('funCity_user', JSON.stringify(data.user));
     localStorage.setItem('funCity_token', data.token);
-    identifyUser(data.user.id, {
+    identifyUser(data.user.id, data.user.username, {
       age_group: data.user.age_group,
       country: data.user.country,
       nyc_familiarity: data.user.nyc_familiarity,

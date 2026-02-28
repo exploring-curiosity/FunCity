@@ -14,6 +14,7 @@ export interface User {
 
 export interface UserDemographics {
   user_id: string;
+  username: string;
   age_group: AgeGroup;
   country: string;
   nyc_familiarity: NycFamiliarity;
