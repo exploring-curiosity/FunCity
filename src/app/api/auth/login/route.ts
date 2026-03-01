@@ -1,37 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
-import { verifyPassword, createToken } from '@/lib/auth';
+import { createToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { username, password } = body;
+    const { username } = body;
 
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
+    if (!username) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
+    }
+
+    const normalized = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    if (normalized.length < 2 || normalized.length > 20) {
+      return NextResponse.json({ error: 'Username must be 2-20 characters (letters, numbers, underscores)' }, { status: 400 });
     }
 
     const supabase = getSupabase();
-    const { data: user, error } = await supabase
+
+    // Check if user exists
+    const { data: existing } = await supabase
       .from('users')
-      .select('*')
-      .eq('username', username.toLowerCase())
+      .select('id, username, age_group, country, nyc_familiarity, created_at')
+      .eq('username', normalized)
       .single();
 
-    if (error || !user) {
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
+    if (existing) {
+      // Existing user — log them in
+      const token = createToken(existing.id, existing.username);
+      return NextResponse.json({ user: existing, token, is_new: false });
     }
 
-    const valid = await verifyPassword(password, user.password_hash);
-    if (!valid) {
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
+    // New user — create account with default demographics
+    const { data: newUser, error } = await supabase
+      .from('users')
+      .insert({
+        username: normalized,
+        password_hash: 'none',
+        age_group: '25-34',
+        country: 'United States',
+        nyc_familiarity: 'visited',
+      })
+      .select('id, username, age_group, country, nyc_familiarity, created_at')
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const token = createToken(user.id, user.username);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash: _hash, ...safeUser } = user;
-
-    return NextResponse.json({ user: safeUser, token });
+    const token = createToken(newUser.id, newUser.username);
+    return NextResponse.json({ user: newUser, token, is_new: true }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }

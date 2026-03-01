@@ -9,7 +9,7 @@ import { AuthModal } from './auth-modal';
 
 export function Navbar() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [authModal, setAuthModal] = useState<'login' | 'signup' | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
 
   return (
     <>
@@ -34,29 +34,20 @@ export function Navbar() {
                 <UserMenu />
               </>
             ) : (
-              <>
-                <button
-                  onClick={() => setAuthModal('login')}
-                  className="rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-                >
-                  Log In
-                </button>
-                <button
-                  onClick={() => setAuthModal('signup')}
-                  className="rounded-md bg-neon-cyan px-3 py-1.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
-                >
-                  Sign Up
-                </button>
-              </>
+              <button
+                onClick={() => setShowAuth(true)}
+                className="rounded-md bg-neon-cyan px-3 py-1.5 text-sm font-semibold text-background transition-opacity hover:opacity-90"
+              >
+                Log In
+              </button>
             )}
           </div>
         </div>
       </nav>
 
       <AuthModal
-        isOpen={authModal !== null}
-        onClose={() => setAuthModal(null)}
-        initialTab={authModal || 'login'}
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
       />
     </>
   );

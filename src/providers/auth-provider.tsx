@@ -9,18 +9,9 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
+  login: (username: string) => Promise<void>;
   logout: () => void;
   getAuthHeaders: () => Record<string, string>;
-}
-
-interface SignupData {
-  username: string;
-  password: string;
-  age_group: string;
-  country: string;
-  nyc_familiarity: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -50,11 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
+  const login = useCallback(async (username: string) => {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username }),
     });
     if (!res.ok) {
       const err = await res.json();
@@ -70,30 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       country: data.user.country,
       nyc_familiarity: data.user.nyc_familiarity,
     });
-    track('user_logged_in', { username: data.user.username });
-  }, []);
-
-  const signup = useCallback(async (signupData: SignupData) => {
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(signupData),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Signup failed');
-    }
-    const data = await res.json();
-    setUser(data.user);
-    setToken(data.token);
-    localStorage.setItem('funCity_user', JSON.stringify(data.user));
-    localStorage.setItem('funCity_token', data.token);
-    identifyUser(data.user.id, data.user.username, {
-      age_group: data.user.age_group,
-      country: data.user.country,
-      nyc_familiarity: data.user.nyc_familiarity,
-    });
-    track('user_signed_up', { username: data.user.username });
+    track(data.is_new ? 'user_signed_up' : 'user_logged_in', { username: data.user.username });
   }, []);
 
   const logout = useCallback(() => {
@@ -112,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated: !!user, isLoading, login, signup, logout, getAuthHeaders }}
+      value={{ user, token, isAuthenticated: !!user, isLoading, login, logout, getAuthHeaders }}
     >
       {children}
     </AuthContext.Provider>

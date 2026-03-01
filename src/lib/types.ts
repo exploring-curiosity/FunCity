@@ -20,6 +20,14 @@ export interface UserDemographics {
   nyc_familiarity: NycFamiliarity;
 }
 
+export const AGE_GROUPS: AgeGroup[] = ['13-17', '18-24', '25-34', '35-44', '45-54', '55+'];
+
+export const NYC_FAMILIARITY_OPTIONS: { value: NycFamiliarity; label: string }[] = [
+  { value: 'never_been', label: 'Never been' },
+  { value: 'visited', label: 'Visited' },
+  { value: 'live_here', label: 'I live here' },
+];
+
 export interface Subreddit {
   id: string;
   name: string;
@@ -83,10 +91,3 @@ export interface AuthToken {
   exp: number;
 }
 
-export const AGE_GROUPS: AgeGroup[] = ['13-17', '18-24', '25-34', '35-44', '45-54', '55+'];
-
-export const NYC_FAMILIARITY_OPTIONS: { value: NycFamiliarity; label: string }[] = [
-  { value: 'never_been', label: 'Never been' },
-  { value: 'visited', label: 'Visited' },
-  { value: 'live_here', label: 'I live here' },
-];
